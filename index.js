@@ -9,12 +9,12 @@ const router = new Router();
 app.use(bodyParser());
 app.use(router.routes());
 
-router.get('/', async (ctx, next)=>{
+router.get('/', async (ctx, next) => {
     const users = await User.find({});
     ctx.body = users;
 })
 
-router.post('/user', async (ctx, next)=>{
+router.post('/user', async (ctx, next) => {
     const user = await User.create({
         login: ctx.request.body.login,
         pass: ctx.request.body.pass
@@ -22,15 +22,15 @@ router.post('/user', async (ctx, next)=>{
     ctx.body = user
 })
 
-router.put('/user/:id', async (ctx, next)=>{
-    const user = await User.findByIdAndUpdate(ctx.params.id,{
+router.put('/user/:id', async (ctx, next) => {
+    const user = await User.findByIdAndUpdate(ctx.params.id, {
         login: ctx.request.body.login,
         pass: ctx.request.body.pass
     });
     ctx.body = user;
 })
 
-router.delete('/user/:id', async (ctx, next)=>{
+router.delete('/user/:id', async (ctx, next) => {
     const user = await User.findByIdAndDelete(ctx.params.id);
     ctx.body = user;
 })
