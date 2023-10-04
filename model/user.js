@@ -3,10 +3,13 @@ const connection = require('../connectDB');
 
 const schema = new mongoose.Schema({
     login: {
-        type: String
+        type: String,
+        required: true,
+        unique: true
     },
-    pass:{
-        type: String
+    pass: {
+        type: String,
+        required: true
     }
 })
 
