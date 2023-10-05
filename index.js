@@ -21,7 +21,7 @@ router.get('/', async ctx => {
     }
 })
 
-router.post('/user', async ctx => {
+router.post('/users', async ctx => {
     try {
         const { login } = ctx.request.body;
         const userExist = await User.findOne({ login });
@@ -40,7 +40,7 @@ router.post('/user', async ctx => {
     }
 })
 
-router.put('/user/:id', async ctx => {
+router.put('/users/:id', async ctx => {
     try {
         const user = await User.findByIdAndUpdate(ctx.params.id, {
             login: ctx.request.body.login,
@@ -54,7 +54,7 @@ router.put('/user/:id', async ctx => {
     }
 })
 
-router.delete('/user/:id', async ctx => {
+router.delete('/users/:id', async ctx => {
     try {
         const user = await User.findByIdAndDelete(ctx.params.id);
         if (!user) ctx.throw(404, 'User not found');
