@@ -1,4 +1,5 @@
 const Koa = require('koa');
+const errorHandler = require('./error-handler');
 const Router = require('koa-router');
 const bodyParser = require('koa-bodyparser');
 const User = require('./model/user');
@@ -9,60 +10,46 @@ const router = new Router();
 const { SERV_PORT } = process.env;
 
 app.use(bodyParser());
+app.use(errorHandler);
 app.use(router.routes());
 
 router.get('/', async ctx => {
-    try {
-        const users = await User.find({});
-        ctx.body = users;
-    } catch (err) {
-        ctx.status = err.status || 500;
-        ctx.body = { error: err.message };
-    }
+    const users = await User.find({});
+    ctx.body = users;
 })
 
 router.post('/users', async ctx => {
-    try {
-        const { login } = ctx.request.body;
-        const userExist = await User.findOne({ login });
-        if (userExist) {
-            ctx.throw(400, 'login already exists');
-        } else {
-            const user = await User.create({
-                login: ctx.request.body.login,
-                pass: ctx.request.body.pass
-            })
-            ctx.body = user
-        }
-    } catch (err) {
-        ctx.status = err.status || 500;
-        ctx.body = { error: err.message };
+    const { login } = ctx.request.body;
+    const userExists = await User.findOne({ login });
+    if (userExists) {
+        ctx.throw(400, 'User already exists');
     }
-})
+    const user = await User.findOneAndUpdate(
+        { login },
+        {
+            $setOnInsert: {
+                login,
+                pass: ctx.request.body.pass
+            }
+        },
+        { upsert: true, new: true }
+    );
+    ctx.body = user;
+});
 
 router.put('/users/:id', async ctx => {
-    try {
-        const user = await User.findByIdAndUpdate(ctx.params.id, {
-            login: ctx.request.body.login,
-            pass: ctx.request.body.pass
-        });
-        if (!user) ctx.throw(404, 'User not found');
-        ctx.body = user;
-    } catch (err) {
-        ctx.status = err.status || 500;
-        ctx.body = { error: err.message };
-    }
+    const user = await User.findByIdAndUpdate(ctx.params.id, {
+        login: ctx.request.body.login,
+        pass: ctx.request.body.pass
+    });
+    if (!user) ctx.throw(404, 'User not found');
+    ctx.body = user;
 })
 
 router.delete('/users/:id', async ctx => {
-    try {
-        const user = await User.findByIdAndDelete(ctx.params.id);
-        if (!user) ctx.throw(404, 'User not found');
-        ctx.body = user;
-    } catch (err) {
-        ctx.status = err.status || 500;
-        ctx.body = { error: err.message };
-    }
+    const user = await User.findByIdAndDelete(ctx.params.id);
+    if (!user) ctx.throw(404, 'User not found');
+    ctx.body = user;
 })
 
 app.listen(SERV_PORT)
